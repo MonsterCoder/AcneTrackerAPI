@@ -28,7 +28,6 @@ class AcneRecord(BaseModel):
     id: int
     severity: int
     location: str
-    detected_at: date
     confidence_score: float
 
 class AcneAnalysisResponse(BaseModel):

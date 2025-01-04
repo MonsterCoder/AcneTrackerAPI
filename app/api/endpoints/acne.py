@@ -35,21 +35,18 @@ async def analyze_image(image: UploadFile = File(...)):
             id=1,
             severity=3,
             location="forehead",
-            detected_at=datetime.now(),
             confidence_score=0.89
         ),
         schemas.AcneRecord(
             id=2,
             severity=2,
             location="cheek",
-            detected_at=datetime.now(),
             confidence_score=0.95
         ),
         schemas.AcneRecord(
             id=3,
             severity=1,
             location="chin",
-            detected_at=datetime.now(),
             confidence_score=0.78
         )
     ]
