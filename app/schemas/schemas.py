@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import date
 from typing import Optional, List
+from datetime import datetime
 
 class UserBase(BaseModel):
     email: str
@@ -33,3 +34,11 @@ class AcneRecord(BaseModel):
 class AcneAnalysisResponse(BaseModel):
     total_detected: int
     records: List[AcneRecord] 
+
+class AcneAnalysis(BaseModel):
+    id: int
+    analysis_result: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True 
