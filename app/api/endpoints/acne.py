@@ -12,7 +12,7 @@ router = APIRouter()
 
 def analyze_image_with_openai(base64_image) -> dict:
     client = AzureOpenAI(
-        api_key="c00357ad34d741e6a870b91b8e3c3a3f",
+        api_key="",
         api_version="2024-05-01-preview",  
         azure_endpoint="https://georgecprot401261087032.openai.azure.com/"
     )
@@ -20,50 +20,61 @@ def analyze_image_with_openai(base64_image) -> dict:
     # Convert the image to base64
     # base64_image = base64.b64encode(image_data).decode('utf-8')
 
+
     # Prepare the messages for GPT-4 Vision
-    messages = [
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": """You are a dermatologist. You are provided a face image, scan this image for acne spots. don't miss any acne spots. Please identify severity level from 1 to 5, location of acne(cheek, forehead, chin etc), confidence score from 0 to 1. Return the results in a json format. Example  result: 
+    system_message = {
+        "role": "system",
+        "content": """
+                    You are a dermatologist.
+                    You are provided a face image, scan this image carefully for skin abnormality such as acne spots, rash or dark spot.
+                    don't miss any sligh or minor ones.
+                    For each spot you find, identify severity level from 1 to 5,
+                    location of acne(cheek, forehead, chin etc), confidence score from 0 to 1. 
+                    Return the results in a json format.
+                    Example  result: 
                     ```
                     {
                     "total_detected": 3,
                     "records": [
-        schemas.AcneRecord(
-            id=1,
-            severity=3,
-            location="forehead",
-            confidence_score=0.89
-        ),
-        schemas.AcneRecord(
-            id=2,
-            severity=2,
-            location="cheek",
-            confidence_score=0.95
-        ),
-        schemas.AcneRecord(
-            id=3,
-            severity=1,
-            location="chin",
-            confidence_score=0.78
-        )
-    ]
+                        schemas.AcneRecord(
+                            id=1,
+                            severity=3,
+                            location="forehead",
+                            confidence_score=0.89
+                        ),
+                        schemas.AcneRecord(
+                            id=2,
+                            severity=2,
+                            location="cheek",
+                            confidence_score=0.95
+                        ),
+                        schemas.AcneRecord(
+                            id=3,
+                            severity=1,
+                            location="chin",
+                            confidence_score=0.78
+                        )
+                    ]
                     ```
                     """
-                },
-                {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{base64_image}"
-                    }
+    }
+    img = f"data:image/jpeg;base64,{base64_image}"
+    user_message = {
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "content": "Scan the image for acne spots and provide the results in a json format."
+            },
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": img
                 }
-            ]
-        }
-    ]
-    print(f"data:image/jpeg;base64,{base64_image}")
+            }
+        ]
+    }
+    messages = [system_message, user_message]
     try:
         # Make the API call
         response = client.chat.completions.create(
@@ -73,7 +84,8 @@ def analyze_image_with_openai(base64_image) -> dict:
             temperature=0.0,
             response_format={"type": "json_object"}
         )
-        print(response)
+        print(response.choices[0].message.content)
+
         return  response.choices[0].message.content
     except Exception as e:
         print(e)
